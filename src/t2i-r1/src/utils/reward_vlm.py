@@ -50,8 +50,7 @@ class _Qwen3VLBase:
         model = Qwen3VLForConditionalGeneration.from_pretrained(
             self.ckpt_path,
             dtype=torch.bfloat16,
-            device_map=load_device,
-        ).eval()
+        ).eval().to(load_device)
 
         for p in model.parameters():
             p.requires_grad = False

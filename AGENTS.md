@@ -67,7 +67,7 @@ CompGen-GRPO/
 
 ```bash
 cd /mlx_devbox/users/xiezifan/playground/CompGen-GRPO
-NPROC=2 MAX_STEPS=1600 CUDA_VISIBLE_DEVICES=0,1 nohup bash src/t2i-r1/src/run_train.sh > src/t2i-r1/src/outputs/train_main/train_main.log 2>&1 &
+NPROC=4 MAX_STEPS=1600 CUDA_VISIBLE_DEVICES=0,1,2,3 nohup bash src/t2i-r1/src/run_train.sh > src/t2i-r1/src/outputs/train_main/train_main.log 2>&1 &
 ```
 
 启动后 sanity check：
@@ -95,9 +95,9 @@ sleep 2 && pgrep -af "torchrun|open_r1/grpo"        # 应该没输出
 
 | 变量 / 参数 | 当前值 | 含义 |
 |---|---|---|
-| `NPROC` (env) | 2 | GPU 数 |
+| `NPROC` (env) | 4 | GPU 数 |
 | `MAX_STEPS` (env) | 1600 | optimizer step 上限 |
-| `--num_generations` | 4 | GRPO 每个 prompt 采几路（**影响 advantage 估计质量**） |
+| `--num_generations` | 8 | GRPO 每个 prompt 采几路（**影响 advantage 估计质量**） |
 | `--per_device_train_batch_size` | 1 | 单卡每步 prompt 数 |
 | `--gradient_accumulation_steps` | 2 | accum 后再 step |
 | `--beta` | 0.01 | KL 正则系数（0 = T2I-R1 默认，ref_model 不加载） |
@@ -108,9 +108,9 @@ sleep 2 && pgrep -af "torchrun|open_r1/grpo"        # 应该没输出
 | `--save_total_limit` | 3 | 最多保留 3 份 ckpt |
 | `--reward_funcs` | hps gdino vlm_attr vlm_orm | 4 维 reward，加 `vlm_attr`/`vlm_orm` 需要 Qwen3-VL-2B |
 
-**有效 batch size = `NPROC × bs × num_gen × accum = 2×1×4×2 = 16` generations/step**。
+**有效 batch size = `NPROC × bs × num_gen × accum = 4×1×8×2 = 64` generations/step**。
 
-**单 step 时间 ≈ 36s**（2×H20，sdpa，num_gen=4）。1600 step ≈ 16h。
+**单 step 时间**：4×A100 + sdpa + num_gen=8 下待实测（旧 2×H20 + num_gen=4 配置下约 36s，仅供参考，不适用当前配置）。
 
 ## 5. 已知坑 + 对策（**不要踩第二次**）
 
@@ -129,7 +129,7 @@ sleep 2 && pgrep -af "torchrun|open_r1/grpo"        # 应该没输出
 ## 6. 环境约定
 
 - **物理机**：byted 平台，master/worker 架构。**训练只能在 worker 跑**（GPU 在 worker）
-- **GPU**：2 × NVIDIA H20（97GB 显存/卡），当前 sdpa 配置约用 36GB/卡
+- **GPU**：4 × NVIDIA A100（80GB 显存/卡）
 - **torch**：byted-torch 2.7.1，`_GLIBCXX_USE_CXX11_ABI=0`（用 `python -c "import torch; print(torch._C._GLIBCXX_USE_CXX11_ABI)"` 验证）
 - **transformers**：4.57（用户回退过；不要升级，会触发更多 API 变化）
 - **trl**：1.4（自带 `_hf_argparser.py`，比 transformers 的 HfArgumentParser 严格）

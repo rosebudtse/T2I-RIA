@@ -66,6 +66,9 @@ export WANDB_RUN_GROUP="advanced"           # 可选，用 git 分支名分组
 #   - 第一次启动 → 新建 run；后续同 EXP_NAME 启动 → 自动接回原 run（曲线连续）
 export WANDB_RUN_ID="$EXP_NAME"
 export WANDB_RESUME=allow
+# tiger 到 api.wandb.ai 网络偶发不稳；默认 90s 常超时。放宽到 600s。
+# 若仍失败，把下一行注释放开切到 offline，事后 `wandb sync outputs/<EXP>/wandb/latest-run` 上传
+export WANDB_INIT_TIMEOUT=600
 # export WANDB_MODE=offline                  # 出网完全不通时改成 offline，事后 wandb sync
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export TOKENIZERS_PARALLELISM=false
@@ -131,7 +134,7 @@ torchrun --nproc_per_node="${NPROC:-1}" \
 --nnodes="1" \
 open_r1/grpo.py \
 --use_vllm=false \
---deepspeed "../configs/zero2.json" \
+--deepspeed "../configs/${ZERO_CFG:-zero2.json}" \
 --output_dir $OUTPUT_DIR \
 --model_name_or_path $MODEL_PATH \
 --dataset_name $HF_DATASET \
@@ -141,17 +144,17 @@ open_r1/grpo.py \
 --max_completion_length 1024 \
 --temperature 1.0 \
 --num_generations 8 \
---per_device_train_batch_size 2 \
+--per_device_train_batch_size 1 \
 --gradient_accumulation_steps 2 \
 --logging_steps 5 \
 --bf16=true \
---dtype bfloat16 \
+--torch_dtype bfloat16 \
 --report_to wandb \
 --gradient_checkpointing=false \
 --attn_implementation sdpa \
 --max_steps "${MAX_STEPS:-1600}" \
 --run_name "$EXP_NAME" \
---save_steps 200 \
+--save_steps 400 \
 --save_total_limit 5 \
 --save_only_model=true \
 --new_generations_image 1 \

@@ -36,6 +36,10 @@ CKPTS=(
     "ablation_wo_orm/checkpoint-400"
     "ablation_wo_orm/checkpoint-600"
     "ablation_wo_orm/checkpoint-800"
+    "full/checkpoint-400"
+    "full/checkpoint-600"
+    "full_7b/checkpoint-400"
+    "full_7b/checkpoint-800"
 )
 
 echo "=========================================="

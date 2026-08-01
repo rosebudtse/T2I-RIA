@@ -254,7 +254,12 @@ def main():
         local_rank = int(os.environ.get("LOCAL_RANK", rank))
         torch.cuda.set_device(local_rank)
         if not dist.is_initialized():
-            dist.init_process_group(backend="nccl")
+            # 传 device_id，让 NCCL 在 init 时就在正确的卡上建 communicator
+            # 否则首次 barrier 时会 fallback 到 cuda:0 申请 workspace，容易 OOM
+            dist.init_process_group(
+                backend="nccl",
+                device_id=torch.device(f"cuda:{local_rank}"),
+            )
     else:
         rank, world_size, local_rank = 0, 1, 0
         torch.cuda.set_device(0)
@@ -330,7 +335,7 @@ def main():
         all_errors += e
         # 同步各 rank 完成同一 category 再进下一类，避免文件计数错位
         if world_size > 1:
-            dist.barrier()
+            dist.barrier(device_ids=[local_rank])
 
     overall_bar.close()
     total_elapsed = time.time() - t_start

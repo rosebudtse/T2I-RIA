@@ -23,6 +23,10 @@
 #     --task TASK     单个任务名或 all。可选：
 #                       color, shape, texture, spatial, non_spatial, complex, all
 #                     默认 all（跑 6 类）。
+#                     **支持多个**：三种写法：
+#                       --task spatial complex        （空格分隔）
+#                       --task spatial,complex        （逗号分隔）
+#                       --task all                    （6 类全跑）
 #     --gpu N         指定单张 GPU（例：--gpu 3）。优先级：
 #                       --gpu > 环境变量 CUDA_VISIBLE_DEVICES > 0
 #                     T2I-CompBench 三个评测器都是单卡单进程，多张 GPU 用不上。
@@ -81,10 +85,22 @@ TASK="all"
 GPU_ARG=""
 
 # ── 参数解析 ──
+# --task 支持三种写法：
+#   1) --task all                    → 6 类全跑
+#   2) --task spatial,complex        → 逗号分隔
+#   3) --task spatial complex        → 空格分隔（会一直吞到下一个 --flag 为止）
+TASK_TOKENS=()
 while [[ $# -gt 0 ]]; do
     case $1 in
         --model) MODEL="$2"; shift 2 ;;
-        --task)  TASK="$2";  shift 2 ;;
+        --task)
+            shift
+            # 收集所有非 --flag 的后续参数
+            while [[ $# -gt 0 && "$1" != --* ]]; do
+                TASK_TOKENS+=("$1")
+                shift
+            done
+            ;;
         --gpu)   GPU_ARG="$2"; shift 2 ;;
         -h|--help)
             # 打印文件头 docstring（从 shebang 之后的 # 注释块）
@@ -94,6 +110,12 @@ while [[ $# -gt 0 ]]; do
         *) echo "Unknown arg: $1" >&2; exit 1 ;;
     esac
 done
+
+# 合并 --task 收集到的 token（可能是 "spatial complex" 或 "spatial,complex"）→ 逗号形式
+if [ ${#TASK_TOKENS[@]} -gt 0 ]; then
+    TASK=$(IFS=','; echo "${TASK_TOKENS[*]}")   # 空格分隔 → "spatial,complex"
+    TASK=${TASK//,,/,}                           # 万一混用了逗号+空格，压掉重复逗号
+fi
 
 # ── GPU 选卡：--gpu > 环境变量 CUDA_VISIBLE_DEVICES > 0 ──
 if [ -n "$GPU_ARG" ]; then
@@ -248,7 +270,7 @@ fi
 if [ "$TASK" = "all" ]; then
     TASKS=("color" "shape" "texture" "spatial" "non_spatial" "complex")
 else
-    TASKS=("$TASK")
+    IFS=',' read -r -a TASKS <<< "$TASK"
 fi
 
 echo ""
