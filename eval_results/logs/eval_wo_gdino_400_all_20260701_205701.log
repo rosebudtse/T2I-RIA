@@ -1,16 +1,0 @@
-[run_eval.sh] LOG_FILE=/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/eval_results/logs/eval_wo_gdino_400_all_20260701_205701.log
-[run_eval.sh] start at 2026-07-01 20:57:01
-
-==============================================
-  Model : wo_gdino_400
-  Task  : all
-==============================================
-
->>> [wo_gdino_400] color
-  0%|          | 0/8 [00:00<?, ?it/s]start VQA1/8!
-Number of Processed Images: 3000
-Creating vqa datasets
-Creating model
-load checkpoint from https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_vqa_capfilt_large.pth
-Start training
- 12%|█▎        | 1/8 [01:50<12:56, 110.97s/it]run_eval.sh: line 58: 57750 Segmentation fault      (core dumped) python BLIP_vqa.py --out_dir "$OUT_DIR"

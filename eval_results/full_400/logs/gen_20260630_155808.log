@@ -1,97 +1,0 @@
-[run_generate.sh] LOG_FILE=/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/eval_results/full_400/logs/gen_20260630_155808.log
-[run_generate.sh] start at 2026-06-30 15:58:08
-Python version is above 3.10, patching the collections module.
-Python version is above 3.10, patching the collections module.
-
-============================================================
-Model : outputs/train_g8_1k6_full/checkpoint-400/
-Output: /mlx_devbox/users/xiezifan/playground/CompGen-GRPO/eval_results/full_400
-World size: 2 (this rank=0, local_rank=0)
-============================================================
-✅ Model loaded.
-
-Categories   : ['color', 'shape', 'texture', 'spatial', 'non_spatial', 'complex']
-Total prompts: 1800 x 20 = 36000 images
-Already done : 897 prompts (will be skipped)
-Sharded across 2 GPU(s): ~900 prompts/GPU
-
-Overall   :  50%|████▉     | 897/1800 [00:00<?]                                               
-[1/6] ── COLOR ── save → /mlx_devbox/users/xiezifan/playground/CompGen-GRPO/eval_results/full_400/color/samples
-Overall   :  50%|████▉     | 897/1800 [00:00<?]  [rank1] Skipping 150 complete prompts
-[rank1]:[W630 15:59:36.788547919 ProcessGroupNCCL.cpp:4718] [PG ID 0 PG GUID 0 Rank 1]  using GPU 1 as device used by this process is currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect. You can pecify device_id in init_process_group() to force use of a particular device.
-                                                 [rank0] Skipping 150 complete prompts
-Overall   :  50%|████▉     | 897/1800 [00:05<?]
-  [r0] color       : |          | 0/0 [00:00<?, ?prompt/s][A  [r0] color       : |          | 0/0 [00:00<?, ?prompt/s]
-                                                 ✅ color rank0 DONE: 150/150 prompts, 3000 images, 0 errors, 0s (total prompts in category: 300)
-Overall   :  50%|████▉     | 897/1800 [00:05<?][rank0]:[W630 15:59:36.791105043 ProcessGroupNCCL.cpp:4718] [PG ID 0 PG GUID 0 Rank 0]  using GPU 0 as device used by this process is currently unknown. This can potentially cause a hang if this rank to GPU mapping is incorrect. You can pecify device_id in init_process_group() to force use of a particular device.
-NCCL version 2.26.2+cuda12.6
-
-[2026-06-30 15:59:36] n136-132-146:2900:3065 [0] misc/nvmlwrap.cc:74 NCCL WARN Failed to open libnvidia-ml.so.1
-
-[2026-06-30 15:59:36] n136-132-146:2901:3064 [1] misc/nvmlwrap.cc:74 NCCL WARN Failed to open libnvidia-ml.so.1
-[rank0]: Traceback (most recent call last):
-[rank0]:   File "/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/src/generate_all_eval.py", line 354, in <module>
-[rank0]:     main()
-[rank0]:   File "/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/src/generate_all_eval.py", line 333, in main
-[rank0]:     dist.barrier()
-[rank0]:   File "/usr/local/lib/python3.11/dist-packages/torch/distributed/c10d_logger.py", line 81, in wrapper
-[rank0]:     return func(*args, **kwargs)
-[rank0]:            ^^^^^^^^^^^^^^^^^^^^^
-[rank0]:   File "/usr/local/lib/python3.11/dist-packages/torch/distributed/distributed_c10d.py", line 4635, in barrier
-[rank0]:     work = group.barrier(opts=opts)
-[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^
-[rank0]: torch.distributed.DistBackendError: NCCL error in: /opt/tiger/compile_path/src/code.byted.org/pytorch/pytorch/torch/csrc/distributed/c10d/NCCLUtils.cpp:77, unhandled system error (run with NCCL_DEBUG=INFO for details), NCCL version 2.26.2
-[rank0]: ncclSystemError: System call (e.g. socket, malloc) or external library call failed or device error. 
-[rank0]: Last error:
-[rank0]: Failed to open libnvidia-ml.so.1
-[rank1]: Traceback (most recent call last):
-[rank1]:   File "/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/src/generate_all_eval.py", line 354, in <module>
-[rank1]:     main()
-[rank1]:   File "/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/src/generate_all_eval.py", line 333, in main
-[rank1]:     dist.barrier()
-[rank1]:   File "/usr/local/lib/python3.11/dist-packages/torch/distributed/c10d_logger.py", line 81, in wrapper
-[rank1]:     return func(*args, **kwargs)
-[rank1]:            ^^^^^^^^^^^^^^^^^^^^^
-[rank1]:   File "/usr/local/lib/python3.11/dist-packages/torch/distributed/distributed_c10d.py", line 4635, in barrier
-[rank1]:     work = group.barrier(opts=opts)
-[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^^^
-[rank1]: torch.distributed.DistBackendError: NCCL error in: /opt/tiger/compile_path/src/code.byted.org/pytorch/pytorch/torch/csrc/distributed/c10d/NCCLUtils.cpp:77, unhandled system error (run with NCCL_DEBUG=INFO for details), NCCL version 2.26.2
-[rank1]: ncclSystemError: System call (e.g. socket, malloc) or external library call failed or device error. 
-[rank1]: Last error:
-[rank1]: Failed to open libnvidia-ml.so.1
-Overall   :  50%|████▉     | 897/1800 [00:06<?]
-[rank0]:[W630 15:59:37.392731801 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
-W0630 15:59:40.349000 2893 torch/distributed/elastic/multiprocessing/api.py:900] Sending process 2900 closing signal SIGTERM
-E0630 15:59:40.721000 2893 torch/distributed/elastic/multiprocessing/api.py:874] failed (exitcode: 1) local_rank: 1 (pid: 2901) of binary: /usr/bin/python3
-Traceback (most recent call last):
-  File "/usr/local/bin/torchrun", line 7, in <module>
-    sys.exit(main())
-             ^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 355, in wrapper
-    return f(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/run.py", line 892, in main
-    run(args)
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/run.py", line 883, in run
-    elastic_launch(
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/launcher/api.py", line 139, in __call__
-    return launch_agent(self._config, self._entrypoint, list(args))
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/launcher/api.py", line 270, in launch_agent
-    raise ChildFailedError(
-torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
-============================================================
-generate_all_eval.py FAILED
-------------------------------------------------------------
-Failures:
-  <NO_OTHER_FAILURES>
-------------------------------------------------------------
-Root Cause (first observed failure):
-[0]:
-  time      : 2026-06-30_15:59:40
-  host      : n136-132-146.byted.org
-  rank      : 1 (local_rank: 1)
-  exitcode  : 1 (pid: 2901)
-  error_file: <N/A>
-  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
-============================================================

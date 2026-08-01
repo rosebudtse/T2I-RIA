@@ -1,25 +1,0 @@
-[run_eval.sh] LOG_FILE=/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/eval_results/logs/eval_wo_gdino_400_all_20260701_204124.log
-[run_eval.sh] start at 2026-07-01 20:41:24
-
-==============================================
-  Model : wo_gdino_400
-  Task  : all
-==============================================
-
->>> [wo_gdino_400] color
-  0%|          | 0/8 [00:00<?, ?it/s]  0%|          | 0/8 [00:00<?, ?it/s]
-start VQA1/8!
-Traceback (most recent call last):
-  File "/mlx_devbox/users/xiezifan/playground/T2I-CompBench/BLIPvqa_eval/BLIP_vqa.py", line 131, in <module>
-    main()
-  File "/mlx_devbox/users/xiezifan/playground/T2I-CompBench/BLIPvqa_eval/BLIP_vqa.py", line 89, in main
-    Create_annotation_for_BLIP(
-  File "/mlx_devbox/users/xiezifan/playground/T2I-CompBench/BLIPvqa_eval/BLIP_vqa.py", line 17, in Create_annotation_for_BLIP
-    nlp = spacy.load("en_core_web_sm")
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/tiger/.local/lib/python3.11/site-packages/spacy/__init__.py", line 74, in load
-    return util.load_model(
-           ^^^^^^^^^^^^^^^^
-  File "/home/tiger/.local/lib/python3.11/site-packages/spacy/util.py", line 531, in load_model
-    raise IOError(Errors.E050.format(name=name))
-OSError: [E050] Can't find model 'en_core_web_sm'. It doesn't seem to be a Python package or a valid path to a data directory.

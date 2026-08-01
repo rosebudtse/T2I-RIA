@@ -6,7 +6,11 @@ src/t2i-r1/reward_weight/
 *.bin
 *.safetensors
 
-eval_results/*/*/samples/
+# docs 全部不纳入版本管理
+docs/
+
+# eval_results 全部排除（体量大：结果 json / 日志 / 中间产物）
+eval_results/
 
 src/t2i-r1/src/outputs/
 src/t2i-r1/src/outputs/debug_run/
