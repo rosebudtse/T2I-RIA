@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-04 by Codex artifact audit
 
-Branch: `advanced` (public artifact release commit at branch HEAD)
+Branch: `advanced` (public artifact release is published on `origin/advanced`)
 
 Repository: `rosebudtse/CompGen-GRPO`
 
@@ -39,9 +39,11 @@ The audited `1c5138f` launcher/runtime mismatch is disclosed there and in
 
 1. Validate on a clean GPU worker: environment check, Grounding DINO build,
    one-step smoke training, one-prompt generation, and evaluator startup.
-2. Verify the release commit on `origin/advanced`. The remote GitHub landing
-   branch is still `main`, so publishing `advanced` alone does not update the
-   repository front page; promote the audited commit to `main` explicitly.
+2. Promote the audited artifact to the default branch. `origin/main` diverges
+   by one old planning commit (`6925267`) whose StructComp document contains
+   superseded V1 numbers. Integrate `main`, explicitly remove or rewrite that
+   document, then open and merge an `advanced` to `main` PR. Do not allow the
+   stale document to reappear through a blind merge.
 
 ### P1
 
