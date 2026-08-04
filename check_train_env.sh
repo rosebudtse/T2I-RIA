@@ -1,84 +1,84 @@
-#!/bin/bash
-# 在 worker 节点（有 GPU）终端运行：bash check_train_env.sh
-# 一次性自检：GPU / Python 依赖 / 模型权重 / 数据文件 是否就绪
+#!/usr/bin/env bash
+set -uo pipefail
+
+# Read-only environment check. Run from any directory:
+#   bash check_train_env.sh
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-RW="$REPO_ROOT/src/t2i-r1/reward_weight"
-PASS="[ OK ]"; FAIL="[FAIL]"; WARN="[WARN]"
+REWARD_ROOT="$REPO_ROOT/src/t2i-r1/reward_weight"
+SOURCE_ROOT="$REPO_ROOT/src/t2i-r1/src"
 
-echo "============================================================"
-echo " CompGen-GRPO 训练环境自检"
-echo " repo: $REPO_ROOT"
-echo "============================================================"
+pass() { printf '[ OK ] %s\n' "$*"; }
+warn() { printf '[WARN] %s\n' "$*"; }
+fail() { printf '[FAIL] %s\n' "$*"; }
 
-echo; echo "### 1. GPU ###"
+printf 'T2I-RIA environment check\nrepository: %s\n\n' "$REPO_ROOT"
+
 if command -v nvidia-smi >/dev/null 2>&1; then
-  nvidia-smi --query-gpu=index,name,memory.total,memory.used --format=csv,noheader 2>&1
+  nvidia-smi --query-gpu=index,name,memory.total,memory.used --format=csv,noheader
 else
-  echo "$FAIL nvidia-smi 不存在"
+  fail 'nvidia-smi is unavailable (run training checks on a GPU worker)'
 fi
 
-echo; echo "### 2. Python & 关键依赖 ###"
-echo "python: $(which python) ($(python -V 2>&1))"
-python - <<'PY'
+printf '\nPython and core packages\n'
+if command -v python >/dev/null 2>&1; then
+  PYTHONPATH="$SOURCE_ROOT${PYTHONPATH:+:$PYTHONPATH}" python - <<'PY'
 import importlib
-def chk(mod, attr="__version__", req=None):
-    try:
-        m = importlib.import_module(mod)
-        v = getattr(m, attr, "?")
-        tag = "[ OK ]"
-        if req and str(v) != req:
-            tag = "[WARN]"
-            print(f"{tag} {mod}={v} (requirements 要求 {req})")
-        else:
-            print(f"{tag} {mod}={v}")
-    except Exception as e:
-        print(f"[FAIL] {mod} 导入失败: {type(e).__name__}: {e}")
 
-chk("torch", req="2.5.1")
-import torch
-print(f"       torch.cuda.is_available={torch.cuda.is_available()} device_count={torch.cuda.device_count()}")
-chk("transformers")
-chk("trl", req="0.16.0")
-chk("deepspeed", req="0.15.4")
-chk("flash_attn")
-chk("accelerate")
-chk("bitsandbytes")   # VLM 4-bit 量化需要
-for mod in ["groundingdino", "janus"]:
-    try:
-        importlib.import_module(mod); print(f"[ OK ] {mod} 可导入")
-    except Exception as e:
-        print(f"[FAIL] {mod} 不可导入: {type(e).__name__}")
-PY
-
-echo; echo "### 3. 模型权重 ###"
-check_path () {  # $1=路径 $2=描述
-  if [ -e "$1" ]; then echo "$PASS $2: $1"; else echo "$FAIL $2 缺失: $1"; fi
+expected = {
+    "torch": "2.5.1",
+    "torchvision": "0.20.1",
+    "torchaudio": "2.5.1",
+    "transformers": "4.57.2",
+    "trl": "0.16.0",
+    "deepspeed": "0.15.4",
+    "wandb": "0.26.1",
 }
-check_path "$RW/HPSv2.1/HPS_v2.1_compressed.pt" "HPS v2.1"
-check_path "$RW/groundingdino_swint_ogc.pth" "GroundingDINO"
-check_path "$RW/Qwen3-VL-2B-Instruct" "Qwen3-VL-2B"
-# Janus 可能在 HF 缓存或本地目录，两处都看
-if ls -d ~/.cache/huggingface/hub/models--deepseek-ai--Janus-Pro-1B >/dev/null 2>&1; then
-  echo "$PASS Janus-Pro-1B: HF 缓存中"
-elif [ -d "$RW/Janus-Pro-1B" ]; then
-  echo "$PASS Janus-Pro-1B: $RW/Janus-Pro-1B"
+
+for module, wanted in expected.items():
+    try:
+        loaded = importlib.import_module(module)
+        actual = str(getattr(loaded, "__version__", "unknown"))
+        status = " OK " if actual.split("+", 1)[0] == wanted else "WARN"
+        print(f"[{status}] {module}={actual} (reference={wanted})")
+    except Exception as exc:
+        print(f"[FAIL] {module}: {type(exc).__name__}: {exc}")
+
+try:
+    import torch
+    print(
+        f"       cuda_available={torch.cuda.is_available()} "
+        f"device_count={torch.cuda.device_count()}"
+    )
+except Exception:
+    pass
+
+for module in ("groundingdino", "janus"):
+    try:
+        importlib.import_module(module)
+        print(f"[ OK ] {module} import")
+    except Exception as exc:
+        print(f"[FAIL] {module}: {type(exc).__name__}: {exc}")
+PY
 else
-  echo "$FAIL Janus-Pro-1B 缺失（HF 缓存和 $RW 中都没有）"
+  fail 'python is unavailable'
 fi
 
-echo; echo "### 4. 数据 / prompt / config ###"
-check_path "$REPO_ROOT/data/geneval_and_t2i_data_final.json" "训练数据"
-check_path "$REPO_ROOT/data/prompt/reasoning_prompt.txt" "reasoning prompt"
-check_path "$REPO_ROOT/src/t2i-r1/configs/zero2.json" "DeepSpeed 配置"
+printf '\nWeights and data\n'
+check_path() {
+  if [ -e "$1" ]; then pass "$2: $1"; else fail "$2 missing: $1"; fi
+}
+check_path "$REWARD_ROOT/Janus-Pro-1B/config.json" 'Janus-Pro-1B'
+check_path "$REWARD_ROOT/Qwen3-VL-2B-Instruct/config.json" 'Qwen3-VL-2B-Instruct'
+check_path "$REWARD_ROOT/HPSv2.1/HPS_v2.1_compressed.pt" 'HPS v2.1'
+check_path "$REWARD_ROOT/groundingdino_swint_ogc.pth" 'GroundingDINO checkpoint'
+check_path "$REWARD_ROOT/bert-base-uncased/config.json" 'GroundingDINO text encoder'
+check_path "$REPO_ROOT/data/geneval_and_t2i_data_final.json" 'training prompts'
+check_path "$REPO_ROOT/data/prompt/reasoning_prompt.txt" 'reasoning prompt'
+check_path "$REPO_ROOT/src/t2i-r1/configs/zero2.json" 'DeepSpeed ZeRO-2 config'
 
-echo; echo "### 5. GroundingDINO 编译产物 ###"
-if ls "$REPO_ROOT"/src/t2i-r1/src/utils/GroundingDINO/groundingdino/_C*.so >/dev/null 2>&1; then
-  echo "$PASS GroundingDINO C 扩展已编译"
+if compgen -G "$SOURCE_ROOT/utils/GroundingDINO/groundingdino/_C*.so" >/dev/null; then
+  pass 'GroundingDINO C++ extension is present'
 else
-  echo "$WARN 未发现 _C*.so，可能需要 cd src/t2i-r1/src/utils/GroundingDINO && pip install -e ."
+  warn 'GroundingDINO C++ extension is absent; run setup_env.sh on the target CUDA worker'
 fi
-
-echo; echo "============================================================"
-echo " 自检结束。出现 [FAIL] 的项必须修复后才能训练。"
-echo "============================================================"

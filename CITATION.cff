@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the T2I-RIA preprint."
+title: "T2I-RIA: Reward Interaction in Small-Backbone BiCoT-GRPO"
+type: software
+authors:
+  - family-names: Xie
+    given-names: Zifan
+repository-code: "https://github.com/rosebudtse/CompGen-GRPO"
+license: Apache-2.0

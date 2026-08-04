@@ -1,17 +1,7 @@
-"""
-Usage:
-    # 单卡
-    python generate_all_eval.py \
-        --model_path outputs/train_g8_1k6_full/checkpoint-800 \
-        --save_root /mlx_devbox/users/xiezifan/playground/CompGen-GRPO/eval_results/finetuned \
-        --num_generation 10 \
-        --skip_existing
+"""Generate the official T2I-CompBench image set for one checkpoint.
 
-    # 多卡数据并行（推荐用 run_generate.sh 包装）
-    torchrun --nproc_per_node=2 generate_all_eval.py \
-        --model_path outputs/train_g8_1k6_full/checkpoint-800 \
-        --save_root .../eval_results/finetuned \
-        --num_generation 10 --skip_existing
+Prefer ``run_generate.sh``; it supplies repository-relative defaults and
+supports multi-GPU data parallelism.
 """
 
 import torch
@@ -21,6 +11,7 @@ import os
 import argparse
 import random
 import time
+from pathlib import Path
 from PIL import Image
 from transformers import AutoModelForCausalLM
 from janus.models import MultiModalityCausalLM, VLChatProcessor
@@ -206,6 +197,7 @@ def run_category(mmgpt, vl_chat_processor, cot_prompt, cat_name, prompt_file, sa
             images = generate_images_for_prompt(
                 mmgpt, vl_chat_processor, prompt_text, cot_prompt,
                 num_generation=args.num_generation, cfg_weight=args.cfg_weight,
+                temperature=args.temperature,
             )
             for i, img_arr in enumerate(images):
                 fname = f"{prompt_text}_{i:06d}.png"
@@ -230,22 +222,32 @@ def run_category(mmgpt, vl_chat_processor, cot_prompt, cat_name, prompt_file, sa
 
 
 def main():
+    repo_root = Path(__file__).resolve().parents[3]
+    bench_root = os.environ.get("T2I_COMPBENCH_DIR")
+    default_dataset = str(Path(bench_root) / "examples" / "dataset") if bench_root else None
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_path", type=str,
-                        default="/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/src/outputs/train_g8_1k6_full/checkpoint-800")
-    parser.add_argument("--dataset_dir", type=str,
-                        default="/mlx_devbox/users/xiezifan/playground/T2I-CompBench/examples/dataset")
-    parser.add_argument("--save_root", type=str,
-                        default="/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/eval_results/finetuned")
-    parser.add_argument("--reasoning_prompt_path", type=str,
-                        default="/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/data/prompt/reasoning_prompt.txt")
+    parser.add_argument("--model_path", required=True)
+    parser.add_argument(
+        "--dataset_dir",
+        default=default_dataset,
+        help="T2I-CompBench examples/dataset (or set T2I_COMPBENCH_DIR)",
+    )
+    parser.add_argument("--save_root", default=str(repo_root / "eval_results" / "finetuned"))
+    parser.add_argument(
+        "--reasoning_prompt_path",
+        default=str(repo_root / "data" / "prompt" / "reasoning_prompt.txt"),
+    )
     parser.add_argument("--num_generation", type=int, default=10)
     parser.add_argument("--cfg_weight", type=float, default=5.0)
+    parser.add_argument("--temperature", type=float, default=1.0)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--skip_existing", action="store_true", help="断点续跑，跳过已生成的 prompt")
     parser.add_argument("--categories", nargs="+",
                         default=["color", "shape", "texture", "spatial", "non_spatial", "complex"])
     args = parser.parse_args()
+    if not args.dataset_dir:
+        parser.error("pass --dataset_dir or set T2I_COMPBENCH_DIR")
 
     # ── DDP init（torchrun 设置 RANK/WORLD_SIZE/LOCAL_RANK）────────────────────
     if "RANK" in os.environ and "WORLD_SIZE" in os.environ:

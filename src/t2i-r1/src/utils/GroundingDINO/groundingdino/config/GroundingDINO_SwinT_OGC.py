@@ -31,7 +31,13 @@ dn_bbox_coef = 1.0
 embed_init_tgt = True
 dn_labelbook_size = 2000
 max_text_len = 256
-text_encoder_type = "/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/reward_weight/bert-base-uncased"
+import os
+
+# Use a local snapshot by setting GDINO_TEXT_ENCODER. The Hub model ID keeps the
+# upstream configuration portable when no local path is supplied.
+text_encoder_type = os.environ.get(
+    "GDINO_TEXT_ENCODER", "google-bert/bert-base-uncased"
+)
 use_text_enhancer = True
 use_fusion_layer = True
 use_checkpoint = True

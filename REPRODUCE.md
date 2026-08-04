@@ -1,87 +1,186 @@
-# 复现训练 — Worker 节点操作手册
+# Reproducing T2I-RIA
 
-> 本文件由环境检查生成，用于在 **worker 节点（有 GPU）** 从零复现 CompGen-GRPO 训练。
-> master 节点无 GPU，以下命令全部在 **worker 终端**执行。仓库在共享存储，路径一致。
+This guide separates three different goals:
 
-## 0. 前置事实
+1. running the released implementation on a new machine;
+2. recreating the reported training shape from frozen runtime records;
+3. reproducing T2I-CompBench generation and evaluation.
 
-- worker：2× NVIDIA H20（97GB/卡），byted-torch 2.7.1（cu126，GPU 可用）
-- 方案：venv 继承系统包，不动 torch；flash_attn 跳过（脚本用 eager attn）
-- janus 是 vendored 本地包，无需安装
+The historical runs did not pin immutable upstream model-weight revisions.
+Exact bitwise reconstruction is therefore not possible; the repository
+preserves the recorded code revisions, arguments, data artifact, and evaluation
+revision that remain available.
 
-## 1. 安装环境（约 10-20 分钟）
+## 1. Environment
+
+Reported core environment:
+
+| Component | Version |
+|---|---|
+| Python | 3.11.2 |
+| PyTorch | 2.5.1 |
+| torchvision | 0.20.1+cu124 |
+| torchaudio | 2.5.1+cu124 |
+| Transformers | 4.57.2 |
+| TRL | 0.16.0 |
+| DeepSpeed | 0.15.4 |
+| W&B | 0.26.1 |
+| Attention backend | SDPA |
+
+Create the environment:
 
 ```bash
-cd /mlx_devbox/users/xiezifan/playground/CompGen-GRPO
-bash setup_env.sh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 \
+  --index-url https://download.pytorch.org/whl/cu124
+python -m pip install -r requirements.txt
+python -m pip install -e src/t2i-r1/src/utils/GroundingDINO --no-build-isolation
 ```
 
-完成后所有依赖装在 `.venv/`。若末尾提示 **groundingdino/_C 不可用**，多半是没有 nvcc：
+The final command requires a CUDA toolkit and `nvcc`. `setup_env.sh` automates
+these steps without deleting an existing environment unless
+`RECREATE_VENV=1` is explicitly set.
+
+## 2. Weights
 
 ```bash
-export CUDA_HOME=/usr/local/cuda          # 指向 cu126 toolkit
-export PATH=$CUDA_HOME/bin:$PATH
-nvcc --version                            # 确认能看到 12.x
-source .venv/bin/activate
-pip install -e src/t2i-r1/src/utils/GroundingDINO --no-build-isolation
-```
-
-## 2. 下载权重（约几十分钟，取决于网速）
-
-```bash
-source .venv/bin/activate
 bash download_weights.sh
-```
-
-下载到 `src/t2i-r1/reward_weight/`：Janus-Pro-1B、Qwen3-VL-2B-Instruct、HPS_v2.1_compressed.pt、groundingdino_swint_ogc.pth。
-连接 HF 慢可先 `export HF_ENDPOINT=https://hf-mirror.com`。
-
-## 3. 复检（确认全绿）
-
-```bash
-source .venv/bin/activate
 bash check_train_env.sh
 ```
 
-所有 `[FAIL]` 应消失。`groundingdino` / `janus` 那两项如仍报，分别按第 1 步补编译、或确认会在 `src/t2i-r1/src/` 工作目录下运行（训练脚本已自动 cd，不影响）。
+The default download includes Janus-Pro-1B, Qwen3-VL-2B-Instruct, HPSv2.1,
+Grounding DINO SwinT-OGC, and bert-base-uncased. Set `DOWNLOAD_7B=1` to also
+download Janus-Pro-7B. See `REWARD_WEIGHTS.md` for the exact layout.
 
-## 4. Smoke test（关键！先跑 5 步验证全链路）
+## 3. Data
 
-正式跑 2000 步前，务必先小步验证。`run_train.sh` 支持环境变量覆盖：
+Training uses the released T2I-R1 artifact:
 
-```bash
-source .venv/bin/activate
-cd /mlx_devbox/users/xiezifan/playground/CompGen-GRPO
-MAX_STEPS=5 CUDA_VISIBLE_DEVICES=0 bash src/t2i-r1/src/run_train.sh
+```text
+data/geneval_and_t2i_data_final.json
 ```
 
-**重点观察**（这是已知风险点）：
-- transformers / trl / Qwen3VL 三者版本是否冲突（reward_vlm.py 需要 `Qwen3VLForConditionalGeneration`，要求 transformers ≥ 4.57）
-- 4 个 reward 模型能否成功加载（HPS、GDino、Qwen3-VL 4-bit）
-- 单步 loss / reward 是否打印、是否有 NaN
-- 显存是否够（1B 训练 + 3 个 reward 模型，单卡 H20 97G 应充足）
+Despite the extension, it is JSONL and contains 7,223 records with 7,223 unique
+prompt strings. Its SHA-256 is:
 
-5 步能跑完且 reward 正常，再进入正式训练。
-
-## 5. 正式训练
-
-```bash
-source .venv/bin/activate
-cd /mlx_devbox/users/xiezifan/playground/CompGen-GRPO
-nohup bash src/t2i-r1/src/run_train.sh > train_main.log 2>&1 &
-tail -f train_main.log
+```text
+96b956b5c92477ea2ff13cdd0c805f762a9d9fd5af43141ada6850ab3f6a0171
 ```
 
-- 默认 2000 步，checkpoint 存到 `src/t2i-r1/src/outputs/train_main/`
-- TensorBoard：`tensorboard --logdir src/t2i-r1/src/outputs/train_main/runs`
-- 想用双卡：`NPROC=2 CUDA_VISIBLE_DEVICES=0,1 bash src/t2i-r1/src/run_train.sh`（需确认 deepspeed 多卡配置）
+## 4. Runtime evidence and historical configs
 
-## 已知风险 / 排错
+The current `run_train.sh` is a portable release launcher. It is not treated as
+the source of truth for every historical invocation.
 
-| 现象 | 可能原因 | 处理 |
-|---|---|---|
-| `Qwen3VLForConditionalGeneration` import 失败 | transformers < 4.57 | `pip install -U "transformers>=4.57.0"` |
-| trl 与 transformers 版本冲突 | trl 0.16.0 对新版 transformers API 不兼容 | 看报错调 trl 版本，或小改 grpo_trainer 适配 |
-| groundingdino `_C` 缺失 | 没装 nvcc / 没编译 | 见第 1 步补编译 |
-| bitsandbytes GPU 报错 | bnb 与 cuda 版本不匹配 | 装匹配 cu12x 的 bitsandbytes |
-| OOM | batch / 生成数过大 | 已是最小配置；检查是否 reward 模型未量化 |
+The evidence hierarchy is:
+
+1. frozen W&B `metadata.args` and run config for actual CLI values;
+2. W&B-recorded Git commit for reward/trainer implementation;
+3. frozen process-count and prompt-sample accounting where visible GPU inventory
+   does not identify torchrun world size;
+4. current launcher defaults only for new runs.
+
+The normalized records for all six paper runs are stored in
+`reproducibility/runtime_configs/paper_runs.json`.
+
+The initial Full-1B run is the important provenance example. Its W&B record
+contains group size 8, per-device batch 2, accumulation 2, beta 0.01, max steps
+1,600, and save steps 400. The committed launcher at `1c5138f` instead contains
+defaults 4, 1, 4, 0, 2,000, and 500. The code revision is authoritative for the
+NF4/GPU-NMS reward implementation; the runtime record is authoritative for the
+actual invocation. Checking out `1c5138f` alone is not a complete launcher
+snapshot.
+
+## 5. Training
+
+### Full-1B BF16 refinement shape
+
+```bash
+NPROC=4 \
+CUDA_VISIBLE_DEVICES=0,1,2,3 \
+EXP_NAME=full_reproduction \
+MODEL_VARIANT=1B \
+PER_DEVICE_TRAIN_BATCH_SIZE=2 \
+GRADIENT_ACCUMULATION_STEPS=2 \
+NUM_GENERATIONS=8 \
+MAX_STEPS=600 \
+SAVE_STEPS=200 \
+BETA=0.01 \
+LEARNING_RATE=1e-6 \
+REPORT_TO=wandb \
+bash src/t2i-r1/src/run_train.sh
+```
+
+This is 16 prompt instances and 128 generated candidates per optimizer step.
+
+### Smoke test
+
+```bash
+NPROC=1 \
+CUDA_VISIBLE_DEVICES=0 \
+PER_DEVICE_TRAIN_BATCH_SIZE=1 \
+GRADIENT_ACCUMULATION_STEPS=1 \
+MAX_STEPS=5 \
+REPORT_TO=none \
+DEBUG_MODE=false \
+bash src/t2i-r1/src/run_train.sh
+```
+
+The smoke test checks integration only; it does not reproduce a reported result.
+
+## 6. Generation
+
+Clone T2I-CompBench at the frozen evaluation revision:
+
+```bash
+git clone https://github.com/Karine-Huang/T2I-CompBench.git
+git -C T2I-CompBench checkout 1b7094991a57f3c22abdd4f6e8ba6c1a15517073
+export T2I_COMPBENCH_DIR="$PWD/T2I-CompBench"
+```
+
+Generate 10 images per prompt:
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1 bash src/t2i-r1/src/run_generate.sh \
+  --nproc 2 \
+  --model_path src/t2i-r1/src/outputs/full/checkpoint-600 \
+  --save_root eval_results/full_600 \
+  --num_generation 10 \
+  --cfg_weight 5.0 \
+  --temperature 1.0 \
+  --seed 42
+```
+
+The seed initializes one RNG stream per rank. Prompt generations consume that
+stream sequentially; `--skip_existing` changes later RNG consumption if earlier
+prompts are skipped. Do not describe this as independent per-prompt reseeding.
+
+## 7. Evaluation
+
+```bash
+bash src/t2i-r1/src/run_eval.sh \
+  --bench_dir "$T2I_COMPBENCH_DIR" \
+  --eval_root eval_results \
+  --model full_600 \
+  --task all \
+  --gpu 0
+```
+
+The official six categories each contain 300 prompts. With 10 images per
+prompt, evaluation uses 18,000 images per checkpoint.
+
+## 8. Known historical behaviors
+
+The reported results retain the original implementation, including:
+
+- raw unit-coefficient reward summation without per-reward normalization;
+- default ORM routing for color, shape, and texture;
+- possible credit for an empty attribute answer through substring matching;
+- numeracy NMS applied to normalized `cxcywh` boxes rather than converted
+  `xyxy` boxes;
+- unavailable historical empty-answer, parse-failure, and NMS-failure rates.
+
+These are disclosure boundaries, not pending statistics. Fixing them belongs to
+a new controlled experiment rather than a retroactive rewrite of V1.

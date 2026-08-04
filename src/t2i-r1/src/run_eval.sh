@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # =============================================================================
 # T2I-CompBench Evaluation Script (v2：支持指定 GPU + 断点恢复)
 # =============================================================================
@@ -11,7 +11,8 @@
 #
 # 使用方法：
 #
-#   bash run_eval.sh --model <MODEL_NAME> [--task <TASK>] [--gpu <N>]
+#   T2I_COMPBENCH_DIR=/path/to/T2I-CompBench bash run_eval.sh \
+#     --model <MODEL_NAME> [--task <TASK>] [--gpu <N>]
 #
 #   参数：
 #     --model MODEL   模型子目录名（eval_results 下的目录）。
@@ -30,6 +31,8 @@
 #     --gpu N         指定单张 GPU（例：--gpu 3）。优先级：
 #                       --gpu > 环境变量 CUDA_VISIBLE_DEVICES > 0
 #                     T2I-CompBench 三个评测器都是单卡单进程，多张 GPU 用不上。
+#     --bench_dir DIR T2I-CompBench clone；也可设置 T2I_COMPBENCH_DIR。
+#     --eval_root DIR 生成图与评测结果根目录；默认仓库下 eval_results/。
 #
 # 特性（v2）：
 #   1) **可中断恢复**：每个 task 开跑前会检查产物 JSON 是否已存在且记录数
@@ -71,8 +74,10 @@
 #   run_generate.sh 已经产出 <MODEL>/<TASK>/samples/*.png。
 # =============================================================================
 
-BENCH_DIR="/mlx_devbox/users/xiezifan/playground/T2I-CompBench"
-EVAL_ROOT="/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/eval_results"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+BENCH_DIR="${T2I_COMPBENCH_DIR:-}"
+EVAL_ROOT="${EVAL_ROOT:-$REPO_ROOT/eval_results}"
 
 # 屏蔽 transformers 的 INFO/WARNING（BertLMHeadModel GenerationMixin 提示、slow image processor 等）
 export TRANSFORMERS_VERBOSITY=error
@@ -102,6 +107,8 @@ while [[ $# -gt 0 ]]; do
             done
             ;;
         --gpu)   GPU_ARG="$2"; shift 2 ;;
+        --bench_dir) BENCH_DIR="$2"; shift 2 ;;
+        --eval_root) EVAL_ROOT="$2"; shift 2 ;;
         -h|--help)
             # 打印文件头 docstring（从 shebang 之后的 # 注释块）
             awk '/^# =====/{n++} n==1{print; next} n>=2{exit}' "$0" | sed 's/^# \?//'
@@ -110,6 +117,12 @@ while [[ $# -gt 0 ]]; do
         *) echo "Unknown arg: $1" >&2; exit 1 ;;
     esac
 done
+
+if [ -z "$BENCH_DIR" ]; then
+    echo "Pass --bench_dir or set T2I_COMPBENCH_DIR." >&2
+    exit 2
+fi
+export EVAL_ROOT
 
 # 合并 --task 收集到的 token（可能是 "spatial complex" 或 "spatial,complex"）→ 逗号形式
 if [ ${#TASK_TOKENS[@]} -gt 0 ]; then
@@ -316,7 +329,7 @@ echo "=============================================="
 python3 - << 'PYEOF'
 import json, os
 
-EVAL_ROOT = "/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/eval_results"
+EVAL_ROOT = os.environ["EVAL_ROOT"]
 
 RESULT_PATHS = {
     "color":       "annotation_blip/vqa_result.json",

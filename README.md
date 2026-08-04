@@ -1,195 +1,200 @@
-# CompGen-GRPO: 
+# T2I-RIA
 
-**Multi-Reward Extension of T2I-R1 for Compositional Text-to-Image Generation**
+**Reward Interaction in Small-Backbone BiCoT-GRPO**
 
-A reinforcement learning project for compositional text-to-image generation, built on [T2I-R1](https://github.com/CaraJ7/T2I-R1) with an enhanced multi-reward system. We adapt **Janus-Pro-1B** to the Bi-CoT-GRPO training pipeline and reach **96.1% of the reported T2I-R1 Janus-Pro-7B average score on T2I-CompBench** using a 1B model.
+T2I-RIA is an empirical study of multi-reward reinforcement learning for
+compositional text-to-image generation. It adapts Janus-Pro with the BiCoT-GRPO
+pipeline inherited from [T2I-R1](https://github.com/CaraJ7/T2I-R1) and studies
+the interaction of four reward signals:
 
----
+- HPSv2.1 preference reward;
+- Grounding DINO object, spatial, and numeracy reward;
+- Qwen3-VL-2B attribute reward;
+- Qwen3-VL-2B ORM-style semantic reward.
 
-## 🏆 Results on T2I-CompBench
+The repository name `CompGen-GRPO` is retained for continuity. T2I-RIA is the
+public paper and experiment name; it is an analysis setting, not a new GRPO
+optimizer.
 
-| Category | Baseline (1B) | **Ours (1B)** | T2I-R1 (7B) |
-|---|---|---|---|
-| Color | 0.3414 | **0.7834** | 0.8130 |
-| Shape | 0.2039 | **0.5090** | 0.5852 |
-| Texture | 0.2774 | **0.6756** | 0.7243 |
-| Spatial | 0.0735 | **0.2976** | 0.3378 |
-| Non-spatial | 0.2621 | **0.3044** | 0.3090 |
-| Complex | 0.2335 | **0.3776** | 0.3993 |
-| **Average** | 0.2320 | **0.4913** | 0.5114 |
+## Results
 
-- ✅ **+111.8%** average improvement over the 1B baseline
-- ✅ **96.1%** of the reported T2I-R1 Janus-Pro-7B T2I-CompBench average score
-- ✅ Non-spatial score (0.3044) nearly matches T2I-R1 7B (0.3090)
+### Local evaluations
 
----
+All local rows use the same generation and T2I-CompBench evaluation pipeline.
+The 1B and 7B values are best-observed checkpoints selected from sparse offline
+evaluations on the reported test benchmark.
 
-## 📌 Overview
+| Model | Backbone | Color | Shape | Texture | Spatial | Non-sp. | Complex | Avg. |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| Baseline | Janus-Pro-1B | 0.3514 | 0.2028 | 0.2740 | 0.0738 | 0.2633 | 0.2314 | 0.2328 |
+| T2I-RIA | Janus-Pro-1B | 0.7985 | 0.4772 | 0.6831 | 0.2971 | 0.3046 | 0.3716 | 0.4887 |
+| T2I-RIA | Janus-Pro-7B | 0.8267 | 0.5805 | 0.7317 | 0.3435 | 0.3094 | 0.4040 | 0.5326 |
 
-This project reproduces and extends T2I-R1 with the following contributions:
+The complete 1B adaptation raises the local average from 0.2328 to 0.4887
+(+0.2559, +109.9% relative). This validates the complete adaptation recipe; it
+does not isolate the gain of the new reward composition relative to a matched
+T2I-R1 reward control.
 
-- **Four-dimensional reward system**: HPS aesthetic reward (`reward_hps.py`) + GroundingDINO spatial reward (`reward_gdino_enhanced.py`) + VLM semantic reward (VLMAttr and VLMOrm) via Qwen3-VL-2B (`reward_vlm.py`)
-- **Enhanced GroundingDINO reward**: improved object detection scoring for spatial compositional alignment
-- **VLM-based semantic reward**: Qwen3-VL-2B as an outcome reward model for fine-grained semantic verification
-- **Full T2I-CompBench evaluation pipeline**: automated scripts for all 6 categories across baseline and finetuned models
+### External context
 
-### Framework
+The following values are reported by T2I-R1 and are not locally reproduced.
+Its average is the arithmetic mean of the six reported category scores.
 
-```
-Janus-Pro-1B
-    └── Bi-CoT-GRPO Training
-            ├── Thinking CoT (compositional reasoning)
-            ├── Drawing CoT (token-level generation)
-            └── Multi-Reward Suite
-                    ├── HPS v2.1       (aesthetic quality)
-                    ├── GDinoEnhanced  (object grounding / spatial / numeracy)
-                    ├── VLMAttr        (attribute-object binding)
-                    └── VLMOrm         (holistic semantic alignment)
-```
+| Model | Backbone | Color | Shape | Texture | Spatial | Non-sp. | Complex | Avg. |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| Baseline (reported) | Janus-Pro-7B | 0.6359 | 0.3528 | 0.4936 | 0.2061 | 0.3085 | 0.3559 | 0.3921 |
+| T2I-R1 (reported) | Janus-Pro-7B | 0.8130 | 0.5852 | 0.7243 | 0.3378 | 0.3090 | 0.3993 | 0.5281 |
 
----
+T2I-RIA-1B reaches 92.5% of the computed T2I-R1 average. T2I-RIA-7B is
+numerically 0.0045 higher, but this external, single-run, test-selected
+comparison is not evidence of superiority.
 
-## 🗂️ Repository Structure
+Full-precision selected results and matched-budget ablations are in
+[`results/main_results.csv`](results/main_results.csv). Sparse checkpoint values
+and evidence limitations are described in [`results/main_results.md`](results/main_results.md).
 
-```
-CompGen-GRPO/
-├── archive/                              # legacy code and local artifacts
-│   ├── legacy_dependencies/LLaVA-NeXT/    # legacy LLaVA ORM dependency
-│   ├── legacy_rewards/                    # original GDino / GIT / ORM rewards
-│   ├── legacy_scripts/                    # old launch/debug scripts
-│   ├── run_artifacts/                     # local training logs / TensorBoard events
-│   └── third_party_extras/                # unused third-party demos/assets
-├── data/
-│   ├── geneval_and_t2i_data_final.json   # training data
-│   └── prompt/reasoning_prompt.txt
-├── docs/                                  # project notes, results, claim audit
-├── eval_results/                          # T2I-CompBench scores (json)
-│   ├── baseline/
-│   └── finetuned/
-├── results/                               # summarized result tables
-├── src/
-│   ├── requirements.txt
-│   └── t2i-r1/src/
-│       ├── run_train.sh                  # main GRPO training launcher
-│       ├── run_eval.sh                   # T2I-CompBench evaluation launcher
-│       ├── generate_all_eval.py          # batch generation for all categories
-│       ├── open_r1/
-│       │   ├── grpo.py                   # GRPO main logic (modified)
-│       │   └── trainer/grpo_trainer.py   # Trainer (modified)
-│       ├── utils/
-│       │   ├── reward_hps.py             # HPS aesthetic reward
-│       │   ├── reward_gdino_enhanced.py  # Enhanced GroundingDINO reward ⭐
-│       │   ├── reward_vlm.py             # Qwen3-VL semantic reward ⭐
-│       │   └── GroundingDINO/            # vendored GDino runtime dependency
-│       ├── janus/                        # vendored Janus runtime dependency
-│       └── infer/reason_inference.py     # Inference script
-├── figs/                                 # Architecture figures
-└── README.md
+## Reward aggregation
+
+The four active scores are summed with unit coefficients:
+
+```text
+R = R_hps + R_gdino + R_attr + R_orm
 ```
 
----
+There is no per-reward normalization before aggregation. HPSv2.1 is an
+unmapped cosine similarity, while the other three rewards return values in
+`[0, 1]`. Unit coefficients therefore do not imply equal effective influence.
+The total reward is group-normalized only after summation.
 
-## 🚀 Quick Start
+## Repository layout
 
-### 1. Environment Setup
+```text
+.
+├── data/                              # 7,223 released training prompts
+├── reproducibility/runtime_configs/   # frozen reconstructed run records
+├── results/                           # paper-aligned result tables
+├── scripts/                           # utility scripts
+├── src/t2i-r1/configs/                # DeepSpeed configs
+└── src/t2i-r1/src/
+    ├── open_r1/                       # GRPO entrypoint and trainer
+    ├── janus/                         # vendored Janus runtime
+    ├── utils/                         # reward implementations + Grounding DINO
+    ├── run_train.sh                   # portable training launcher
+    ├── run_generate.sh                # T2I-CompBench image generation
+    └── run_eval.sh                    # official evaluator wrapper
+```
+
+## Installation
+
+The reported worker environment used Python 3.11, PyTorch 2.5.1,
+torchvision 0.20.1, Transformers 4.57.2, TRL 0.16.0, and DeepSpeed 0.15.4.
+The paper used SDPA; FlashAttention is not required.
+
+For CUDA 12.4, the matching PyTorch installation is:
 
 ```bash
-pip install -r src/requirements.txt
-cd src/t2i-r1/src/utils/GroundingDINO && pip install -e .
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 \
+  --index-url https://download.pytorch.org/whl/cu124
+python -m pip install -r requirements.txt
+python -m pip install -e src/t2i-r1/src/utils/GroundingDINO --no-build-isolation
 ```
 
-### 2. Download Model Weights
+`setup_env.sh` performs the same setup. A CUDA toolkit with `nvcc` is required
+to compile the vendored Grounding DINO extension.
+
+## Download weights
 
 ```bash
-# Janus-Pro-1B (base model)
-huggingface-cli download deepseek-ai/Janus-Pro-1B --local-dir src/t2i-r1/reward_weight/Janus-Pro-1B
-
-# HPS v2.1 checkpoint
-# Place HPS_v2.1_compressed.pt in src/t2i-r1/reward_weight/
-
-# GroundingDINO weights
-# Place groundingdino_swint_ogc.pth in src/t2i-r1/reward_weight/
+source .venv/bin/activate
+bash download_weights.sh
+bash check_train_env.sh
 ```
 
-### 3. Training
+Weights are stored under `src/t2i-r1/reward_weight/` and are excluded from Git.
+See [`REWARD_WEIGHTS.md`](REWARD_WEIGHTS.md) for sources, optional 7B download,
+and the expected directory layout. The historical runs did not pin immutable
+upstream model revisions, so exact historical snapshots cannot be recovered.
+
+## Training
+
+The launcher accepts environment-variable overrides. Its defaults reproduce the
+reported BF16 Full-1B training shape: four processes, two prompts per device,
+two accumulation steps, group size eight, 600 optimizer steps, and checkpoints
+every 200 steps.
 
 ```bash
-bash src/t2i-r1/src/run_train.sh
+NPROC=4 CUDA_VISIBLE_DEVICES=0,1,2,3 \
+  bash src/t2i-r1/src/run_train.sh
 ```
 
-Key training arguments (in `run_train.sh`):
-
-| Argument | Value |
-|---|---|
-| Base model | Janus-Pro-1B |
-| Training steps | 2000 |
-| DeepSpeed | ZeRO-2 |
-| Reward weights | HPS + GDino + VLMAttr + VLMOrm |
-
-### 4. Generate Images for Evaluation
+This corresponds to 16 prompt instances and 128 generated candidates per
+optimizer step. A one-process smoke test can be run with:
 
 ```bash
-# Generate for all categories
-python src/t2i-r1/src/generate_all_eval.py
+NPROC=1 MAX_STEPS=5 PER_DEVICE_TRAIN_BATCH_SIZE=1 \
+GRADIENT_ACCUMULATION_STEPS=1 REPORT_TO=none DEBUG_MODE=false \
+  bash src/t2i-r1/src/run_train.sh
 ```
 
-### 5. Run T2I-CompBench Evaluation
+The exact historical runtime records are not inferred from the current
+launcher. See [`reproducibility/runtime_configs/README.md`](reproducibility/runtime_configs/README.md)
+and [`paper_runs.json`](reproducibility/runtime_configs/paper_runs.json).
+
+## Generation and evaluation
+
+Clone the official T2I-CompBench repository separately and pass its path:
 
 ```bash
-# Evaluate all models and all tasks
-bash src/t2i-r1/src/run_eval.sh --model both --task all
+export T2I_COMPBENCH_DIR=/path/to/T2I-CompBench
 
-# Evaluate finetuned model on spatial only
-bash src/t2i-r1/src/run_eval.sh --model finetuned --task spatial
+CUDA_VISIBLE_DEVICES=0,1 bash src/t2i-r1/src/run_generate.sh \
+  --nproc 2 \
+  --model_path src/t2i-r1/src/outputs/full/checkpoint-600 \
+  --save_root eval_results/full_600
+
+bash src/t2i-r1/src/run_eval.sh \
+  --bench_dir "$T2I_COMPBENCH_DIR" \
+  --eval_root eval_results \
+  --model full_600 \
+  --task all \
+  --gpu 0
 ```
 
-The script prints a formatted results table at the end comparing baseline vs. finetuned across all categories.
+The paper used T2I-CompBench commit
+`1b7094991a57f3c22abdd4f6e8ba6c1a15517073`, 300 prompts per category,
+10 images per prompt, and 18,000 generated images per evaluated checkpoint.
+The generation seed initializes one RNG stream per rank; it is not an
+independently reset per-prompt seed, and resuming with `--skip_existing` can
+change subsequent RNG consumption.
 
----
+## Historical implementation boundaries
 
-## 📊 Reward System Details
+The release preserves the implementation used for the reported runs. Known
+historical behaviors include:
 
-| Reward | Model | Measures |
-|---|---|---|
-| HPS | HPS v2.1 | Aesthetic quality / human preference |
-| GDinoEnhanced | GroundingDINO SwinT-OGC | Object existence, soft spatial relation, soft numeracy |
-| VLMAttr | Qwen3-VL-2B-Instruct | Fine-grained attribute-object binding |
-| VLMOrm | Qwen3-VL-2B-Instruct | Holistic prompt-image semantic alignment |
+- color, shape, and texture are routed to the default ORM template because the
+  preprocessor returns the original task label;
+- an empty attribute answer can pass the bidirectional substring match;
+- numeracy NMS receives normalized `cxcywh` boxes although the operator expects
+  `xyxy`;
+- historical upstream model snapshot revisions and failure/fallback rates were
+  not recorded.
 
-Legacy GIT, original GDino, and LLaVA ORM rewards are kept under `archive/legacy_rewards/` and `archive/legacy_dependencies/` for reference or future ablation, but they are not enabled by the main training script.
+These behaviors are disclosed rather than retroactively changed. Corrected
+variants require new controlled experiments.
 
----
+## Acknowledgements
 
-## 🌿 Advanced Branch Workflow
+- [T2I-R1](https://github.com/CaraJ7/T2I-R1)
+- [Janus](https://github.com/deepseek-ai/Janus)
+- [T2I-CompBench](https://github.com/Karine-Huang/T2I-CompBench)
+- [Grounding DINO](https://github.com/IDEA-Research/GroundingDINO)
+- [HPSv2](https://github.com/tgxs002/HPSv2)
 
-This branch is intended for further exploration of CompGen-GRPO, including reward ablation, reward reliability analysis, and structured constraint-level rewards.
+## License
 
-```bash
-# Check local changes
-git status
-
-# Stage and commit the cleaned repository structure
-git add .
-git commit -m "Clean up project structure for advanced exploration"
-
-# Push this new branch to GitHub
-git push -u origin advanced
-```
-
-Pushing `advanced` creates or updates the remote `advanced` branch. It does not change `main` unless this branch is later merged into `main`.
-
----
-
-## 🙏 Acknowledgements
-
-- [T2I-R1](https://github.com/CaraJ7/T2I-R1) — original Bi-CoT-GRPO framework
-- [Janus-Pro](https://github.com/deepseek-ai/Janus) — base multimodal model
-- [T2I-CompBench](https://karine-h.github.io/T2I-CompBench/) — evaluation benchmark
-- [GroundingDINO](https://github.com/IDEA-Research/GroundingDINO) — spatial reward backbone
-- [HPS v2](https://github.com/tgxs002/HPSv2) — aesthetic reward
-
----
-
-## 📄 License
-
-This project follows the license of the original [T2I-R1](https://github.com/CaraJ7/T2I-R1) repository.
+Project-authored code is released under Apache-2.0. Vendored components and
+downloaded model weights remain subject to their upstream licenses.

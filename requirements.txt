@@ -1,36 +1,31 @@
-# CompGen-GRPO 训练环境 requirements
-#
-# 适用环境（worker 节点）：
-#   - Python 3.11
-#   - byted-torch 2.7.1 已由系统包提供 → 本文件不重装 torch
-#   - transformers 5.9.0 已由系统包提供 → 本文件不重装 transformers
-#   - groundingdino 已通过 cd src/t2i-r1/src/utils/GroundingDINO && pip install -e . 装好
-#   - janus 不是 PyPI 包，已 vendored 在 src/t2i-r1/src/janus，靠 PYTHONPATH 加载
-#
-# 安装：
-#   pip install -r requirements.txt
-#
-# 校验：
-#   bash check_train_env.sh
-#
-# ⚠️ flash-attn 安装失败时的回退：
-#   1) 注释掉本文件最下方的 flash-attn 行
-#   2) 把 src/t2i-r1/src/run_train.sh 里 --attn_implementation 改回 sdpa
-#   （不必改 trainer 代码，--attn_implementation 已能正确传到 language_model）
+# Install the platform-specific PyTorch stack first. The reported environment
+# used torch 2.5.1, torchvision 0.20.1, and torchaudio 2.5.1 with CUDA 12.4.
 
-# ── 核心 RL 依赖 ────────────────────────────────────────────
-trl
-deepspeed
+# Recorded core training stack
+transformers==4.57.2
+trl==0.16.0
+deepspeed==0.15.4
+wandb==0.26.1
+huggingface_hub==0.36.2
+
+# Trainer and model runtime
 accelerate
 peft
+datasets
+einops
+timm
+attrdict
+sentencepiece
+protobuf
+numpy
+pillow
+requests
+tqdm
 
-# ── VLM reward 4-bit 量化（reward_vlm.py 必需）────────────
-bitsandbytes
-
-# ── HPS reward 必需（reward_hps.py 用 hpsv2.src.open_clip）──
+# Reward models
 hpsv2
 
-# ── GroundingDINO 运行期依赖（util 模块用到，避免 import 时炸）
+# Grounding DINO runtime and build dependencies
 addict
 yapf
 termcolor
@@ -38,23 +33,5 @@ supervision
 pycocotools
 opencv-python-headless
 
-# ── Janus vendored 包运行期依赖 ────────────────────────────
-# attrdict 在 Py3.10+ 已停止维护，janus/models/modeling_vlm.py 自带 collections monkeypatch；
-# 装不上时改用 attrdict3 也可（API 兼容）
-attrdict
-
-# ── 数据 / 训练辅助 ──────────────────────────────────────────
-datasets
-einops
-sentencepiece
-protobuf
-
-# ── 日志 ────────────────────────────────────────────────────
+# Optional local logging
 tensorboard
-wandb
-
-# ── flash_attn（可选，加速 5-15%；装不上请按文件顶部注释回退）──
-# 不加版本号，让 pip 在 byted-torch 2.7.1 + CUDA 12.6 下挑兼容 wheel；
-# 若长时间 building from source，可中断后改用 sdpa
-flash-attn
-

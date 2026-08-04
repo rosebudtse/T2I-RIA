@@ -1,212 +1,0 @@
-[run_train.sh] EXP_NAME=train_g8_1k6_full
-[run_train.sh] OUTPUT_DIR=/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/src/outputs/train_g8_1k6_full
-[run_train.sh] LOG_FILE=/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/src/outputs/train_g8_1k6_full/train_main.log
-[run_train.sh] start at 2026-06-29 16:36:59
-Python version is above 3.10, patching the collections module.
-NCCL version 2.26.2+cuda12.6
-[rank0]: Traceback (most recent call last):
-[rank0]:   File "/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/src/open_r1/grpo.py", line 226, in <module>
-[rank0]:     script_args, training_args, model_args = parser.parse_args_and_config()
-[rank0]:                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-[rank0]:   File "/home/tiger/.local/lib/python3.11/site-packages/trl/scripts/utils.py", line 335, in parse_args_and_config
-[rank0]:     output = self.parse_args_into_dataclasses(args=args, return_remaining_strings=return_remaining_strings)
-[rank0]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-[rank0]:   File "/home/tiger/.local/lib/python3.11/site-packages/trl/scripts/_hf_argparser.py", line 349, in parse_args_into_dataclasses
-[rank0]:     obj = dtype(**inputs)
-[rank0]:           ^^^^^^^^^^^^^^^
-[rank0]:   File "<string>", line 213, in __init__
-[rank0]:   File "/home/tiger/.local/lib/python3.11/site-packages/trl/trainer/grpo_config.py", line 943, in __post_init__
-[rank0]:     raise ValueError(
-[rank0]: ValueError: generation_batch_size (4) must be divisible by num_generations (8).
-[rank0]:[W629 16:38:45.387384405 ProcessGroupNCCL.cpp:1479] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
-E0629 16:38:47.839000 15812 torch/distributed/elastic/multiprocessing/api.py:874] failed (exitcode: 1) local_rank: 0 (pid: 15832) of binary: /usr/bin/python3
-Traceback (most recent call last):
-  File "/usr/local/bin/torchrun", line 7, in <module>
-    sys.exit(main())
-             ^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 355, in wrapper
-    return f(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/run.py", line 892, in main
-    run(args)
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/run.py", line 883, in run
-    elastic_launch(
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/launcher/api.py", line 139, in __call__
-    return launch_agent(self._config, self._entrypoint, list(args))
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/launcher/api.py", line 270, in launch_agent
-    raise ChildFailedError(
-torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
-============================================================
-open_r1/grpo.py FAILED
-------------------------------------------------------------
-Failures:
-  <NO_OTHER_FAILURES>
-------------------------------------------------------------
-Root Cause (first observed failure):
-[0]:
-  time      : 2026-06-29_16:38:47
-  host      : n136-098-078.byted.org
-  rank      : 0 (local_rank: 0)
-  exitcode  : 1 (pid: 15832)
-  error_file: <N/A>
-  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
-============================================================
-[run_train.sh] finished at 2026-06-29 16:38:48 (exit=0)
-[run_train.sh] EXP_NAME=my_run_v1
-[run_train.sh] OUTPUT_DIR=/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/src/outputs/my_run_v1
-[run_train.sh] LOG_FILE=/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/src/outputs/my_run_v1/train_main.log
-[run_train.sh] start at 2026-06-29 16:45:58
-Python version is above 3.10, patching the collections module.Python version is above 3.10, patching the collections module.Python version is above 3.10, patching the collections module.
-
-
-Python version is above 3.10, patching the collections module.
-W0629 16:47:19.647000 16732 torch/distributed/elastic/agent/server/api.py:719] Received 15 death signal, shutting down workers
-W0629 16:47:19.654000 16732 torch/distributed/elastic/multiprocessing/api.py:900] Sending process 16756 closing signal SIGTERM
-W0629 16:47:19.659000 16732 torch/distributed/elastic/multiprocessing/api.py:900] Sending process 16757 closing signal SIGTERM
-W0629 16:47:19.659000 16732 torch/distributed/elastic/multiprocessing/api.py:900] Sending process 16758 closing signal SIGTERM
-W0629 16:47:19.659000 16732 torch/distributed/elastic/multiprocessing/api.py:900] Sending process 16759 closing signal SIGTERM
-Traceback (most recent call last):
-  File "/usr/local/bin/torchrun", line 7, in <module>
-    sys.exit(main())
-             ^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 355, in wrapper
-    return f(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/run.py", line 892, in main
-    run(args)
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/run.py", line 883, in run
-    elastic_launch(
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/launcher/api.py", line 139, in __call__
-    return launch_agent(self._config, self._entrypoint, list(args))
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/launcher/api.py", line 261, in launch_agent
-    result = agent.run()
-             ^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/elastic/metrics/api.py", line 138, in wrapper
-    result = f(*args, **kwargs)
-             ^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/elastic/agent/server/api.py", line 711, in run
-    result = self._invoke_run(role)
-             ^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/elastic/agent/server/api.py", line 870, in _invoke_run
-    time.sleep(monitor_interval)
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/elastic/multiprocessing/api.py", line 84, in _terminate_process_handler
-    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
-torch.distributed.elastic.multiprocessing.api.SignalException: Process 16732 got signal: 15
-[run_train.sh] finished at 2026-06-29 16:47:20 (exit=0)
-[run_train.sh] EXP_NAME=train_g8_1k6_full
-[run_train.sh] OUTPUT_DIR=/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/src/outputs/train_g8_1k6_full
-[run_train.sh] LOG_FILE=/mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/src/outputs/train_g8_1k6_full/train_main.log
-[run_train.sh] start at 2026-06-29 16:47:57
-Python version is above 3.10, patching the collections module.Python version is above 3.10, patching the collections module.Python version is above 3.10, patching the collections module.
-
-
-Python version is above 3.10, patching the collections module.
-NCCL version 2.26.2+cuda12.6
-Dataset length:  7223
-***************no image in dataset***************
-using:  <class 'open_r1.trainer.grpo_trainer.JanusT2IR1Trainer'>
-`torch_dtype` is deprecated! Use `dtype` instead!
-Dataset length:  7223
-***************no image in dataset***************
-using:  <class 'open_r1.trainer.grpo_trainer.JanusT2IR1Trainer'>
-`torch_dtype` is deprecated! Use `dtype` instead!
-Dataset length:  7223
-***************no image in dataset***************
-using:  <class 'open_r1.trainer.grpo_trainer.JanusT2IR1Trainer'>
-`torch_dtype` is deprecated! Use `dtype` instead!
-Dataset length:  7223
-***************no image in dataset***************
-using:  <class 'open_r1.trainer.grpo_trainer.JanusT2IR1Trainer'>
-`torch_dtype` is deprecated! Use `dtype` instead!
-Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
-Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
-Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
-You are using the default legacy behaviour of the <class 'transformers.models.llama.tokenization_llama_fast.LlamaTokenizerFast'>. This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thoroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565 - if you loaded a llama tokenizer from a GGUF file you can ignore this message.
-You are using the default legacy behaviour of the <class 'transformers.models.llama.tokenization_llama_fast.LlamaTokenizerFast'>. This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thoroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565 - if you loaded a llama tokenizer from a GGUF file you can ignore this message.
-Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
-You are using the default legacy behaviour of the <class 'transformers.models.llama.tokenization_llama_fast.LlamaTokenizerFast'>. This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thoroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565 - if you loaded a llama tokenizer from a GGUF file you can ignore this message.
-You are using the default legacy behaviour of the <class 'transformers.models.llama.tokenization_llama_fast.LlamaTokenizerFast'>. This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thoroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565 - if you loaded a llama tokenizer from a GGUF file you can ignore this message.
-final text_encoder_type: /mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/reward_weight/bert-base-uncased
-final text_encoder_type: /mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/reward_weight/bert-base-uncased
-final text_encoder_type: /mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/reward_weight/bert-base-uncased
-final text_encoder_type: /mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/reward_weight/bert-base-uncased
-[RANK 0] Detected kernel version 5.4.143, which is below the recommended minimum of 5.5.0; this can cause the process to hang. It is recommended to upgrade the kernel to the minimum version or higher.
-begin bf16_optimizer
-MA 3.89 GB         Max_MA 3.89 GB         CA 3.91 GB         Max_CA 4 GB 
-CPU Virtual Memory:  used = 383.85 GB, percent = 19.1%
-end bf16_ optimizer
-MA 3.89 GB         Max_MA 3.89 GB         CA 3.91 GB         Max_CA 4 GB 
-CPU Virtual Memory:  used = 383.85 GB, percent = 19.1%
-[VLM Reward] Loading Qwen3-VL-2B (bf16) from: /mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/reward_weight/Qwen3-VL-2B-Instruct
-[VLM Reward] Loading Qwen3-VL-2B (bf16) from: /mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/reward_weight/Qwen3-VL-2B-Instruct
-[VLM Reward] Loading Qwen3-VL-2B (bf16) from: /mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/reward_weight/Qwen3-VL-2B-Instruct
-[VLM Reward] Loading Qwen3-VL-2B (bf16) from: /mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/reward_weight/Qwen3-VL-2B-Instruct
-[VLM Reward] Loaded (bf16). Memory: 11.10 GB
-[VLM Reward] Reusing shared Qwen3-VL-2B instance.
-The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'eos_token_id': 100001, 'bos_token_id': 100000, 'pad_token_id': 100002}.
-[VLM Reward] Loaded (bf16). Memory: 11.10 GB
-[VLM Reward] Reusing shared Qwen3-VL-2B instance.
-The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'eos_token_id': 100001, 'bos_token_id': 100000, 'pad_token_id': 100002}.
-[VLM Reward] Loaded (bf16). Memory: 11.10 GB
-[VLM Reward] Reusing shared Qwen3-VL-2B instance.
-The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'eos_token_id': 100001, 'bos_token_id': 100000, 'pad_token_id': 100002}.
-[VLM Reward] Loaded (bf16). Memory: 11.10 GB
-[VLM Reward] Reusing shared Qwen3-VL-2B instance.
-The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'eos_token_id': 100001, 'bos_token_id': 100000, 'pad_token_id': 100002}.
-WARNING:accelerate.accelerator:[RANK 0] Gradient accumulation steps mismatch: GradientAccumulationPlugin has 1, DeepSpeed config has 2. Using DeepSpeed's value.
-wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from /home/tiger/.netrc.
-wandb: Currently logged in as: zfxie (zfxie-the-chinese-university-of-hong-kong) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
-wandb: setting up run pzqavz7g
-wandb: Tracking run with wandb version 0.25.0
-wandb: Run data is saved locally in /mlx_devbox/users/xiezifan/playground/CompGen-GRPO/src/t2i-r1/src/wandb/run-20260629_164951-pzqavz7g
-wandb: Run `wandb offline` to turn off syncing.
-wandb: Syncing run train_g8_1k6_full
-wandb: ⭐️ View project at https://wandb.ai/zfxie-the-chinese-university-of-hong-kong/CompGen-GRPO
-wandb: 🚀 View run at https://wandb.ai/zfxie-the-chinese-university-of-hong-kong/CompGen-GRPO/runs/pzqavz7g
-  0%|          | 0/1600 [00:00<?, ?it/s]  0%|          | 1/1600 [01:19<35:09:16, 79.15s/it]  0%|          | 2/1600 [02:15<29:08:30, 65.65s/it]  0%|          | 3/1600 [03:15<28:03:47, 63.26s/it]  0%|          | 4/1600 [04:39<31:38:11, 71.36s/it]  0%|          | 5/1600 [06:13<35:12:46, 79.48s/it]                                                   {'loss': 0.007831750065088272, 'grad_norm': 2.0767111778259277, 'learning_rate': 9.975e-07, 'kl': 0.00100250244140625, 'completion_length': 65.2421875, 'rewards/HPSv2': 0.17380025386810302, 'rewards/GDinoEnhanced': 0.5763548195362092, 'rewards/VLMAttr': 0.17304688096046447, 'rewards/VLMOrm': 0.3914062827825546, 'reward': 1.3146081924438477, 'reward_std': 0.4402469038963318, 'epoch': 0.01}
-  0%|          | 5/1600 [06:13<35:12:46, 79.48s/it]  0%|          | 6/1600 [07:06<31:10:05, 70.39s/it]  0%|          | 7/1600 [07:57<28:19:48, 64.02s/it]  0%|          | 8/1600 [08:50<26:47:58, 60.60s/it]  1%|          | 9/1600 [09:39<25:15:37, 57.16s/it]  1%|          | 10/1600 [11:06<29:17:08, 66.31s/it]                                                    {'loss': 0.009977952227927744, 'grad_norm': 1.4502085447311401, 'learning_rate': 9.94375e-07, 'kl': 0.001314544677734375, 'completion_length': 61.9546875, 'rewards/HPSv2': 0.17865300178527832, 'rewards/GDinoEnhanced': 0.6140016198158265, 'rewards/VLMAttr': 0.16861979514360428, 'rewards/VLMOrm': 0.4134375363588333, 'reward': 1.3747119307518005, 'reward_std': 0.4305278778076172, 'epoch': 0.02}
-  1%|          | 10/1600 [11:06<29:17:08, 66.31s/it]  1%|          | 11/1600 [11:57<27:06:53, 61.43s/it]  1%|          | 12/1600 [13:22<30:16:30, 68.63s/it]  1%|          | 13/1600 [14:38<31:15:26, 70.91s/it]  1%|          | 14/1600 [16:02<32:56:18, 74.77s/it]  1%|          | 15/1600 [17:33<35:09:38, 79.86s/it]                                                    {'loss': 0.012836794182658196, 'grad_norm': 0.7515422105789185, 'learning_rate': 9.912499999999998e-07, 'kl': 0.001532745361328125, 'completion_length': 61.9765625, 'rewards/HPSv2': 0.1934129238128662, 'rewards/GDinoEnhanced': 0.6739959388971328, 'rewards/VLMAttr': 0.27122396528720855, 'rewards/VLMOrm': 0.44000003635883334, 'reward': 1.5786328315734863, 'reward_std': 0.48346956074237823, 'epoch': 0.03}
-  1%|          | 15/1600 [17:33<35:09:38, 79.86s/it]  1%|          | 16/1600 [18:36<32:51:32, 74.68s/it]  1%|          | 17/1600 [20:01<34:17:11, 77.97s/it]  1%|          | 18/1600 [20:51<30:30:46, 69.44s/it]  1%|          | 19/1600 [21:46<28:38:34, 65.22s/it]  1%|▏         | 20/1600 [22:45<27:46:07, 63.27s/it]                                                    {'loss': 0.003148334566503763, 'grad_norm': 0.8141540884971619, 'learning_rate': 9.88125e-07, 'kl': 0.002252960205078125, 'completion_length': 60.784375, 'rewards/HPSv2': 0.18379902839660645, 'rewards/GDinoEnhanced': 0.6641240298748017, 'rewards/VLMAttr': 0.20234375298023224, 'rewards/VLMOrm': 0.4470313012599945, 'reward': 1.497298038005829, 'reward_std': 0.4589565843343735, 'epoch': 0.04}
-  1%|▏         | 20/1600 [22:45<27:46:07, 63.27s/it]  1%|▏         | 21/1600 [24:45<35:15:36, 80.39s/it]  1%|▏         | 22/1600 [25:37<31:27:06, 71.75s/it]  1%|▏         | 23/1600 [26:33<29:19:20, 66.94s/it]  2%|▏         | 24/1600 [27:50<30:42:47, 70.16s/it]  2%|▏         | 25/1600 [28:41<28:10:56, 64.42s/it]                                                    {'loss': 0.013894470944069325, 'grad_norm': 0.7407452464103699, 'learning_rate': 9.849999999999999e-07, 'kl': 0.00462188720703125, 'completion_length': 66.071875, 'rewards/HPSv2': 0.18920178413391114, 'rewards/GDinoEnhanced': 0.6609106719493866, 'rewards/VLMAttr': 0.1627604141831398, 'rewards/VLMOrm': 0.4590625464916229, 'reward': 1.4719353556632995, 'reward_std': 0.4791237860918045, 'epoch': 0.06}
-  2%|▏         | 25/1600 [28:41<28:10:56, 64.42s/it]  2%|▏         | 26/1600 [30:08<31:00:35, 70.92s/it]  2%|▏         | 27/1600 [31:01<28:38:59, 65.57s/it]  2%|▏         | 28/1600 [32:28<31:27:31, 72.04s/it]  2%|▏         | 29/1600 [33:52<33:03:01, 75.74s/it]  2%|▏         | 30/1600 [34:57<31:33:10, 72.35s/it]                                                    {'loss': 0.021564007736742496, 'grad_norm': 0.6550254821777344, 'learning_rate': 9.81875e-07, 'kl': 0.006634521484375, 'completion_length': 64.86875, 'rewards/HPSv2': 0.19405975341796874, 'rewards/GDinoEnhanced': 0.6530674457550049, 'rewards/VLMAttr': 0.19294270724058152, 'rewards/VLMOrm': 0.47156254649162294, 'reward': 1.5116324424743652, 'reward_std': 0.480985164642334, 'epoch': 0.07}
-  2%|▏         | 30/1600 [34:57<31:33:10, 72.35s/it]  2%|▏         | 31/1600 [35:55<29:38:31, 68.01s/it]  2%|▏         | 32/1600 [36:49<27:50:14, 63.91s/it]  2%|▏         | 33/1600 [38:12<30:23:09, 69.81s/it]  2%|▏         | 34/1600 [39:04<27:56:30, 64.23s/it]  2%|▏         | 35/1600 [39:55<26:15:40, 60.41s/it]                                                    {'loss': 0.005688946112059057, 'grad_norm': 0.6708028316497803, 'learning_rate': 9.7875e-07, 'kl': 0.0097137451171875, 'completion_length': 61.575, 'rewards/HPSv2': 0.19693422317504883, 'rewards/GDinoEnhanced': 0.7054868042469025, 'rewards/VLMAttr': 0.24218750102445483, 'rewards/VLMOrm': 0.47375004589557645, 'reward': 1.618358552455902, 'reward_std': 0.4506709486246109, 'epoch': 0.08}
-  2%|▏         | 35/1600 [39:55<26:15:40, 60.41s/it]  2%|▏         | 36/1600 [40:47<25:07:04, 57.82s/it]  2%|▏         | 37/1600 [42:15<29:03:45, 66.94s/it]  2%|▏         | 38/1600 [43:42<31:36:25, 72.85s/it]  2%|▏         | 39/1600 [44:32<28:41:57, 66.19s/it]  2%|▎         | 40/1600 [45:23<26:37:22, 61.44s/it]                                                    {'loss': 0.011224592593498528, 'grad_norm': 0.7325220108032227, 'learning_rate': 9.756249999999999e-07, 'kl': 0.016400146484375, 'completion_length': 59.534375, 'rewards/HPSv2': 0.20273847579956056, 'rewards/GDinoEnhanced': 0.7049918413162232, 'rewards/VLMAttr': 0.2533333346247673, 'rewards/VLMOrm': 0.5046875357627869, 'reward': 1.6657511353492738, 'reward_std': 0.47075839042663575, 'epoch': 0.09}
-  2%|▎         | 40/1600 [45:23<26:37:22, 61.44s/it]  3%|▎         | 41/1600 [46:26<26:52:17, 62.05s/it]  3%|▎         | 42/1600 [47:20<25:44:50, 59.49s/it]  3%|▎         | 43/1600 [48:16<25:19:48, 58.57s/it]  3%|▎         | 44/1600 [49:53<30:14:08, 69.95s/it]  3%|▎         | 45/1600 [50:51<28:38:56, 66.33s/it]                                                    {'loss': 0.0013909938337747008, 'grad_norm': 0.7168417572975159, 'learning_rate': 9.725e-07, 'kl': 0.02313232421875, 'completion_length': 59.7046875, 'rewards/HPSv2': 0.2110158920288086, 'rewards/GDinoEnhanced': 0.7046552777290345, 'rewards/VLMAttr': 0.28971354514360426, 'rewards/VLMOrm': 0.5640625447034836, 'reward': 1.7694471836090089, 'reward_std': 0.42969065010547636, 'epoch': 0.1}
-  3%|▎         | 45/1600 [50:51<28:38:56, 66.33s/it]  3%|▎         | 46/1600 [51:59<28:50:50, 66.83s/it]  3%|▎         | 47/1600 [52:47<26:24:21, 61.21s/it]  3%|▎         | 48/1600 [53:41<25:33:03, 59.27s/it]  3%|▎         | 49/1600 [54:38<25:09:25, 58.39s/it]  3%|▎         | 50/1600 [56:01<28:20:48, 65.84s/it]                                                    {'loss': 0.004231067746877671, 'grad_norm': 0.7949525117874146, 'learning_rate': 9.69375e-07, 'kl': 0.0298583984375, 'completion_length': 60.7546875, 'rewards/HPSv2': 0.21775450706481933, 'rewards/GDinoEnhanced': 0.739787083864212, 'rewards/VLMAttr': 0.2775000035762787, 'rewards/VLMOrm': 0.5587500244379043, 'reward': 1.7937916040420532, 'reward_std': 0.42338038682937623, 'epoch': 0.11}
-  3%|▎         | 50/1600 [56:01<28:20:48, 65.84s/it]W0629 17:46:30.516000 17011 torch/distributed/elastic/agent/server/api.py:719] Received 15 death signal, shutting down workers
-W0629 17:46:30.531000 17011 torch/distributed/elastic/multiprocessing/api.py:900] Sending process 17029 closing signal SIGTERM
-W0629 17:46:30.538000 17011 torch/distributed/elastic/multiprocessing/api.py:900] Sending process 17030 closing signal SIGTERM
-W0629 17:46:30.539000 17011 torch/distributed/elastic/multiprocessing/api.py:900] Sending process 17031 closing signal SIGTERM
-W0629 17:46:30.540000 17011 torch/distributed/elastic/multiprocessing/api.py:900] Sending process 17032 closing signal SIGTERM
-Traceback (most recent call last):
-  File "/usr/local/bin/torchrun", line 7, in <module>
-    sys.exit(main())
-             ^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 355, in wrapper
-    return f(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/run.py", line 892, in main
-    run(args)
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/run.py", line 883, in run
-    elastic_launch(
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/launcher/api.py", line 139, in __call__
-    return launch_agent(self._config, self._entrypoint, list(args))
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/launcher/api.py", line 261, in launch_agent
-    result = agent.run()
-             ^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/elastic/metrics/api.py", line 138, in wrapper
-    result = f(*args, **kwargs)
-             ^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/elastic/agent/server/api.py", line 711, in run
-    result = self._invoke_run(role)
-             ^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/elastic/agent/server/api.py", line 870, in _invoke_run
-    time.sleep(monitor_interval)
-  File "/usr/local/lib/python3.11/dist-packages/torch/distributed/elastic/multiprocessing/api.py", line 84, in _terminate_process_handler
-    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
-torch.distributed.elastic.multiprocessing.api.SignalException: Process 17011 got signal: 15
-src/t2i-r1/src/run_train.sh: line 124: r_pin_memory: command not found
-[run_train.sh] finished at 2026-06-29 17:46:33 (exit=0)

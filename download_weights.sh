@@ -1,48 +1,56 @@
-#!/bin/bash
-# download_weights.sh — 在 worker 节点运行：bash download_weights.sh
-# HF 直连下载 4 个模型权重到 reward_weight/。
-# 若需走代理：export HF_ENDPOINT=https://hf-mirror.com 再运行。
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Prerequisite: install the pinned Python dependencies first. This script never
+# installs packages implicitly.
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-RW="$REPO_ROOT/src/t2i-r1/reward_weight"
-mkdir -p "$RW"
+REWARD_ROOT="$REPO_ROOT/src/t2i-r1/reward_weight"
+mkdir -p "$REWARD_ROOT/HPSv2.1"
 
-# 优先使用 venv 里的 hf cli
-if [ -f "$REPO_ROOT/.venv/bin/activate" ]; then source "$REPO_ROOT/.venv/bin/activate"; fi
-pip install -q "huggingface_hub[cli]" >/dev/null 2>&1 || true
+if command -v hf >/dev/null 2>&1; then
+  HF_CLI=(hf download)
+elif command -v huggingface-cli >/dev/null 2>&1; then
+  HF_CLI=(huggingface-cli download)
+else
+  echo 'Missing Hugging Face CLI. Install requirements.txt, then rerun.' >&2
+  exit 1
+fi
 
-DL() {  # 用 hf download；新旧 CLI 名称兼容
-  if command -v hf >/dev/null 2>&1; then hf download "$@";
-  else huggingface-cli download "$@"; fi
+download_repo() {
+  local repo_id="$1"
+  local target="$2"
+  local marker="$3"
+  if [ -e "$target/$marker" ]; then
+    echo "present: $target"
+  else
+    "${HF_CLI[@]}" "$repo_id" --local-dir "$target"
+  fi
 }
 
-echo "=== [1/4] Janus-Pro-1B（基座模型）==="
-if [ ! -f "$RW/Janus-Pro-1B/config.json" ]; then
-  DL deepseek-ai/Janus-Pro-1B --local-dir "$RW/Janus-Pro-1B"
-else echo "已存在，跳过"; fi
+download_repo deepseek-ai/Janus-Pro-1B "$REWARD_ROOT/Janus-Pro-1B" config.json
+if [ "${DOWNLOAD_7B:-0}" = '1' ]; then
+  download_repo deepseek-ai/Janus-Pro-7B "$REWARD_ROOT/Janus-Pro-7B" config.json
+fi
+download_repo Qwen/Qwen3-VL-2B-Instruct "$REWARD_ROOT/Qwen3-VL-2B-Instruct" config.json
+download_repo google-bert/bert-base-uncased "$REWARD_ROOT/bert-base-uncased" config.json
 
-echo "=== [2/4] Qwen3-VL-2B-Instruct（VLMAttr + VLMOrm 奖励）==="
-if [ ! -f "$RW/Qwen3-VL-2B-Instruct/config.json" ]; then
-  DL Qwen/Qwen3-VL-2B-Instruct --local-dir "$RW/Qwen3-VL-2B-Instruct"
-else echo "已存在，跳过"; fi
+if [ ! -s "$REWARD_ROOT/HPSv2.1/HPS_v2.1_compressed.pt" ]; then
+  "${HF_CLI[@]}" xswu/HPSv2 HPS_v2.1_compressed.pt \
+    --local-dir "$REWARD_ROOT/HPSv2.1"
+fi
 
-echo "=== [3/4] HPS v2.1 checkpoint ==="
-if [ ! -f "$RW/HPS_v2.1_compressed.pt" ]; then
-  # HPS v2.1 权重托管在 xswu/HPSv2 仓库
-  DL xswu/HPSv2 HPS_v2.1_compressed.pt --local-dir "$RW"
-else echo "已存在，跳过"; fi
+GDINO_FILE="$REWARD_ROOT/groundingdino_swint_ogc.pth"
+GDINO_URL='https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth'
+if [ ! -s "$GDINO_FILE" ]; then
+  if command -v curl >/dev/null 2>&1; then
+    curl --fail --location --continue-at - --output "$GDINO_FILE" "$GDINO_URL"
+  elif command -v wget >/dev/null 2>&1; then
+    wget --continue --output-document="$GDINO_FILE" "$GDINO_URL"
+  else
+    echo 'Neither curl nor wget is available.' >&2
+    exit 1
+  fi
+fi
 
-echo "=== [4/4] GroundingDINO SwinT-OGC 权重 ==="
-if [ ! -f "$RW/groundingdino_swint_ogc.pth" ]; then
-  # 官方 release 直链
-  wget -c "https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth" \
-       -O "$RW/groundingdino_swint_ogc.pth"
-else echo "已存在，跳过"; fi
-
-echo
-echo "=== 校验 ==="
-ls -lh "$RW"
-echo "Janus 目录:"; ls "$RW/Janus-Pro-1B" 2>/dev/null | head
-echo "Qwen3-VL 目录:"; ls "$RW/Qwen3-VL-2B-Instruct" 2>/dev/null | head
-echo "完成。如有文件缺失或 0 字节，请检查网络 / HF_ENDPOINT。"
+echo 'Weight download complete. Run: bash check_train_env.sh'

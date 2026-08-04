@@ -1,13 +1,26 @@
 .venv/
+.env
+.DS_Store
+nohup.out
+smoke.log
+*.log
+*.tfevents.*
+*.tar
+
+# Local historical material intentionally excluded from the public artifact.
+# These paths are retained on the maintainer's workstation after git rm --cached.
+/archive/
+/figs/
+/image-gen/
+/scripts/hf_upload/
+/TODO_cn.md
+/TODO_en.md
 
 src/t2i-r1/reward_weight/
 *.pt
 *.pth
 *.bin
 *.safetensors
-
-# docs 全部不纳入版本管理
-docs/
 
 # eval_results 全部排除（体量大：结果 json / 日志 / 中间产物）
 eval_results/
@@ -25,6 +38,7 @@ src/t2i-r1/src/outputs/train_main/training_args.bin
 src/t2i-r1/src/outputs/train_main/train_log*.txt
 
 src/t2i-r1/src/wandb
+wandb/
 
 **/.ipynb_checkpoints/
 
@@ -35,3 +49,7 @@ src/t2i-r1/src/wandb
 src/t2i-r1/src/=*
 
 src/t2i-r1/src/utils/GroundingDINO/build/
+
+# Local release/build scratch
+dist/
+build/
