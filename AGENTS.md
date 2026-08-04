@@ -10,7 +10,7 @@ training worker. Update `MEMORY.md` before ending a work session.
 ## Project identity
 
 The public paper/setting name is **T2I-RIA (Text-to-Image Reward Interaction
-Analysis)**, titled **T2I-RIA: Reward Interaction in Small-Backbone
+Analysis)**, titled **T2I-RIA: Reward Interaction Analysis in Small-Backbone
 BiCoT-GRPO**. The historical repository name `CompGen-GRPO` remains in the
 GitHub URL. T2I-RIA is an analysis setting, not a new GRPO optimizer.
 

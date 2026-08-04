@@ -1,6 +1,6 @@
 # T2I-RIA
 
-**Reward Interaction in Small-Backbone BiCoT-GRPO**
+**Reward Interaction Analysis in Small-Backbone BiCoT-GRPO**
 
 T2I-RIA is an empirical study of multi-reward reinforcement learning for
 compositional text-to-image generation. It adapts Janus-Pro with the BiCoT-GRPO

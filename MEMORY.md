@@ -1,6 +1,6 @@
 # MEMORY.md — T2I-RIA public artifact status
 
-Last updated: 2026-08-04 by Codex artifact audit
+Last updated: 2026-08-05 by Codex title synchronization
 
 Branch: `advanced` (public artifact release is published on `origin/advanced`)
 
@@ -17,6 +17,9 @@ training or evaluation was started or stopped during this audit.
 The public artifact was re-audited after the paper reached ArXiv-ready status.
 The working tree now contains:
 
+- the frozen paper title, **T2I-RIA: Reward Interaction Analysis in
+  Small-Backbone BiCoT-GRPO**, synchronized across README, AGENTS, and
+  `CITATION.cff`;
 - paper-aligned T2I-RIA naming, claims, and result tables;
 - a portable environment setup and a single pinned dependency surface;
 - corrected weight paths and a local/Hub-selectable Grounding DINO encoder;
