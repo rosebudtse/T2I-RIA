@@ -30,5 +30,8 @@ does not rank them together with the local evaluations.
   checkpoints evaluated on the T2I-CompBench test prompts.
 - Each local row uses 300 prompts per category, ten images per prompt, and a
   fixed seed stream (18,000 images per checkpoint).
-- Full sparse checkpoint results and the component diagnostics are retained in
-  `main_results.csv` and the paper appendix.
+- Selected headline results and matched reward-removal results are retained in
+  `main_results.csv`. Full sparse-checkpoint scores are reported in the T2I-RIA
+  technical report, while audited run identities, evaluated checkpoints, and
+  checkpoint-selection mappings are recorded in
+  `reproducibility/runtime_configs/paper_runs.json`.

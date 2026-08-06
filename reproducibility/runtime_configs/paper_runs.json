@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "reconstructed_from_frozen_runtime_evidence",
-  "generated_on": "2026-08-04",
+  "generated_on": "2026-08-06",
   "shared": {
     "world_size": 4,
     "group_size": 8,
@@ -32,8 +32,8 @@
       "save_steps": 400,
       "save_total_limit": 3,
       "last_logged_step": 1200,
-      "evaluated_checkpoints": [400, 800],
-      "note": "Runtime arguments differ from the checked-in launcher defaults at this commit."
+      "evaluated_checkpoints": [800],
+      "note": "Runtime arguments differ from the checked-in launcher defaults at this commit. Only the step-800 benchmark result is retained; no step-400 or step-1200 benchmark artifact from this run is available."
     },
     {
       "id": "full_1b_refinement",
@@ -51,7 +51,7 @@
       "save_steps": 200,
       "save_total_limit": 5,
       "last_logged_step": 600,
-      "evaluated_checkpoints": [600],
+      "evaluated_checkpoints": [400, 600],
       "selected_checkpoint": 600
     },
     {
@@ -69,9 +69,9 @@
       "max_steps": 1600,
       "save_steps": 400,
       "last_logged_step": 1230,
-      "evaluated_checkpoints": [400, 500, 800, 1200],
-      "selected_checkpoint": 500,
-      "note": "The step-500 checkpoint was non-periodic; its preservation provenance is unavailable."
+      "evaluated_checkpoints": [400, 800, 1200],
+      "selected_checkpoint": 400,
+      "note": "The reported 0.5326 result corresponds to checkpoint 400 of this run."
     },
     {
       "id": "without_attr",
